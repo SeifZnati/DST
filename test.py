@@ -1,5 +1,4 @@
 import json
-import pprint
 import time
 from selenium import webdriver
 from selenium.webdriver.edge.service import Service
@@ -35,23 +34,30 @@ def capture_network_data():
     try:
         email = "znatiseif@gmail.com"
         password = "vGzSe@_3gNkf3az"
-        login_url = "https://expa.aiesec.org/"
+        login_url = "https://auth.aiesec.org/members/sign_in"
 
         driver.get(login_url)
         print(f"Navigated to {login_url}")
 
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "email"))).send_keys(email)
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "password"))).send_keys(password)
-        input("Press Enter after completing any additional login steps...")  # Pause for manual login completion
-        print("Login submitted")
 
-        target_url = "https://expa.aiesec.org/people/5622450"
-        driver.get(target_url)
-        print(f"Navigated to {target_url}")
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, "//*[@id='sign-in-button']"))).click()
+        print("Sign-In button clicked")
 
-        time.sleep(5)  # Wait for page to load fully
+        time.sleep(3)
+
+        previous_url = driver.current_url
+        while True:
+            current_url = driver.current_url
+            if current_url != previous_url:
+                print(f"URL changed to {current_url}, waiting for 10 seconds...")
+                time.sleep(5)
+                break
+            time.sleep(1)
+
+        # Capture logs after waiting
         logs = driver.get_log("performance")
-
         first_graphql_headers = header(logs)
 
         if first_graphql_headers:
